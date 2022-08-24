@@ -1,4 +1,4 @@
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,10 +11,7 @@ import java.util.regex.Pattern;
 public class Main {
     public static void main(String[] args) {
         String data = new Scanner(System.in).nextLine().replace(" ", "").trim();
-
-
         calc(data);
-
     }
 
     /**
@@ -22,77 +19,82 @@ public class Main {
      * @param data
      */
     public static void calc(String data) {
-        dataValidation(data);
-        int firstNumber = findFirstNumber(data);
-        String sign = findExpressionSign(data);
-        int secondNumber = findSecondNumber(data, sign, firstNumber);
-
-        if (secondNumber == 0) {
+        try {
+            dataValidation(data);
+        } catch (RuntimeException e) {
             System.out.println("Неверный формат данных");
-            System.exit(0);
         }
 
-        dataValidation(firstNumber, secondNumber);
+        String operationSign = getSign(data);
 
-        int result = selectOperation(firstNumber, secondNumber, sign);
-        System.out.println(result);
+        String firstNumber = data.substring(0, data.indexOf(operationSign)).toUpperCase();
+        String secondNumber = data.substring(data.indexOf(operationSign) + 1).toUpperCase();
 
+        String numbersTypeResult = "";
 
+        try {
+            numbersTypeResult = checkDataType(firstNumber, secondNumber);
+        } catch (RuntimeException e) {
+            System.out.println("Неверный формат данных");
+        }
+
+        dataValidation(firstNumber, secondNumber, numbersTypeResult);
     }
 
+    private static void dataValidation(String number1, String number2, String numbersType) {
+        if (numbersType.equals("arabic")) {
+            System.out.println("туц туц");
+        } else if (numbersType.equals("romanian")) {
+            System.out.println("пам пам");
+        }
+    }
 
-    /**
-     * Select operation and calculate operation result
-     * @param firstNumber
-     * @param secondNumber
-     * @param assign
-     * @return
-     */
-    private static int selectOperation(int firstNumber, int secondNumber, String assign) {
-        int result = 0;
+    private static String checkDataType(String number1, String number2) {
+        String result = "";
 
-        switch (assign) {
-            case "+":
-                result = firstNumber + secondNumber;
-                break;
-            case "-":
-                result = firstNumber - secondNumber;
-                break;
-            case "*":
-                result = firstNumber * secondNumber;
-                break;
-            case "/":
-                result = (int)(firstNumber / secondNumber);
-                break;
+        List<ArrayList> romanNumbers = new ArrayList(Arrays.asList("I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"));
+        List<ArrayList> arabicNumbers = new ArrayList(Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"));
+
+        if (romanNumbers.contains(number1) && romanNumbers.contains(number2)) {
+            result = "romanian";
+        } else if (arabicNumbers.contains(number1) && arabicNumbers.contains(number2)) {
+            result = "arabic";
+        } else if ( (romanNumbers.contains(number1) && arabicNumbers.contains(number2)) || (romanNumbers.contains(number2) && arabicNumbers.contains(number1))){
+            try {
+                throw new Exception();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return result;
     }
 
-    /**
-     * input validation
-     * @param number1
-     * @param number2
-     */
-    private static void dataValidation(int number1, int number2) {
+    private static String getSign(String data) {
+        String result = "";
 
-        int firstNumber = number1;
-        int secondNumber = number2;
+        String inputData = data;
 
-        if ((firstNumber < 1 || secondNumber > 10) || (secondNumber < 1 || firstNumber > 10)){
-            System.out.println("ошибка, выход за пределы одного из значений");
-            System.exit(0);
+        String[] values = {"-", "+", "/", "*"};
+
+        for (String value : values) {
+            if (inputData.contains(value)) {
+                result = value;
+                break;
+            }
         }
-
+        return result;
     }
+
     private static void dataValidation(String data) {
         String result = "";
-        String inputData = data;
-        String[] signs = {"+", "-", "*", "/"};
 
-        for (String sign : signs) {
-            if (inputData.contains(sign)) {
-                result = sign;
+        String inputData = data;
+        String[] values = {"-", "+", "/", "*"};
+
+        for (int i = 0; i < values.length; i++) {
+            if (inputData.contains(values[i])) {
+                result = values[i];
             }
         }
 
@@ -100,83 +102,42 @@ public class Main {
             try {
                 throw new Exception();
             } catch (Exception e) {
-                System.out.println("Неверный формат данных");
-                System.exit(0);
+                throw new RuntimeException(e);
             }
         }
 
-        int res;
 
-        for (String sign : signs) {
-            res = inputData.length() - inputData.replace(sign, "").length() / sign.length();
+        char[] dataChars = inputData.toCharArray();
 
-            if (res > 1) {
-                try {
-                    throw new Exception();
-                } catch (Exception e) {
-                    System.out.println("Неверный формат данных");
-                    System.exit(0);
+        for (String value : values) {
+            int counter = 0;
+
+            for (char dataChar : dataChars) {
+                if (value.equals(String.valueOf(dataChar))) {
+                    counter += 1;
+                }
+
+                if (counter > 1) {
+                    try {
+                        throw new Exception();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
 
-
-    }
-
-
-    /**
-     * Give second number from string
-     */
-    private static int findSecondNumber(String data, String assing, int firstNumber) {
-        String tempString = new StringBuilder(String.valueOf(firstNumber)).append(assing).toString();
-        int result = 0;
-
-        try {
-            result = Integer.parseInt(data.replace(tempString, ""));
-            return result;
-        } catch (NumberFormatException exception) {
-            System.out.print("");
-        }
-
-        return result;
-    }
-
-
-    /**
-     * Give first number from string using regular expressions (one way)
-     *
-     */
-    private static int findFirstNumber(String inputData) {
-        String firstNumber = inputData;
-
-        Matcher matcher = Pattern.compile("\\d+").matcher(firstNumber);
-        matcher.find();
-
-        int i = Integer.valueOf(matcher.group());
-
-        return i;
-    }
-
-
-    /**
-     * Give empression sign from string
-     * @param inputData
-     * @return
-     */
-    private static String findExpressionSign(String data) {
-        String result = "";
-        String inputData = data;
-
-        String[] signs = {"+","-","*","/"};
-
-        for (int i = 0; i < signs.length; i++) {
-            if (inputData.contains(signs[i])) {
-                result = signs[i];
-                break;
+        for (String value : values) {
+            for (int i = 0; i < dataChars.length; i++) {
+                if ((String.valueOf(dataChars[0]).equals(value)) || (String.valueOf(dataChars[dataChars.length-1]).equals(value))) {
+                    try {
+                        throw new Exception();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
 
-        return result;
     }
-
 }
