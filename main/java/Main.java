@@ -6,12 +6,27 @@ import java.util.regex.Pattern;
 /**
  * java Mentor
  * Test tasks
- * Simple calculator
+ * Simple calculator for kata academy
+ * @Author Silichev Andrey
  */
 public class Main {
     public static void main(String[] args) {
-        String data = new Scanner(System.in).nextLine().replace(" ", "").trim();
-        calc(data);
+        System.out.println("Simple calculator");
+        System.out.println("Enter expression with arabic or romanian numbers");
+        System.out.println("For exit, enter \'kata\'");
+
+        while (true) {
+            System.out.print("User expression: ");
+            String data = new Scanner(System.in).nextLine().replace(" ", "").trim();
+
+            if (data.equals("kata".toLowerCase())) {
+                System.out.println("Goodbye!");
+                break;
+            }
+            calc(data);
+        }
+
+
     }
 
     /**
@@ -38,17 +53,140 @@ public class Main {
             System.out.println("Неверный формат данных");
         }
 
-        dataValidation(firstNumber, secondNumber, numbersTypeResult);
-    }
 
-    private static void dataValidation(String number1, String number2, String numbersType) {
-        if (numbersType.equals("arabic")) {
-            System.out.println("туц туц");
-        } else if (numbersType.equals("romanian")) {
-            System.out.println("пам пам");
+        if (numbersTypeResult.equals("arabic")) {
+
+            int operationResult = arabicNumbersCalculate(firstNumber, secondNumber, operationSign);
+            System.out.println(operationResult);
+
+
+        } else if (numbersTypeResult.equals("romanian")) {
+            try {
+                String result = romanianNumbersCalculate(firstNumber, secondNumber, operationSign);
+                System.out.println(result);
+            } catch (RuntimeException e) {
+                System.out.println("Выход за пределы диапазона значений");
+            }
         }
     }
 
+    /**
+     * the result of the expression of the entered Roman numerals
+     * @param number1
+     * @param number2
+     * @param sign
+     * @return
+     */
+    private static String romanianNumbersCalculate(String number1, String number2, String sign) {
+        int result = 0;
+
+        HashMap<String, Integer> romanianToIntegers = new HashMap<>();
+        romanianToIntegers.put("I", 1);
+        romanianToIntegers.put("II", 2);
+        romanianToIntegers.put("III", 3);
+        romanianToIntegers.put("IV", 4);
+        romanianToIntegers.put("V", 5);
+        romanianToIntegers.put("VI", 6);
+        romanianToIntegers.put("VII", 7);
+        romanianToIntegers.put("VIII", 8);
+        romanianToIntegers.put("IX", 9);
+        romanianToIntegers.put("X", 10);
+
+        int firstNumber = 0;
+        int secondNumber = 0;
+
+
+        firstNumber = romanianToIntegers.get(number1);
+        secondNumber = romanianToIntegers.get(number2);
+
+        if (firstNumber < 1 || secondNumber > 10) {
+            try {
+                throw new Exception();
+            } catch (Exception e) {
+                System.out.println("Выход за пределы диапазона значений");
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (sign.equals("+")) {
+            result = firstNumber + secondNumber;
+        } else if (sign.equals("-")) {
+            result = firstNumber - secondNumber;
+        } else if (sign.equals("*")) {
+            result = firstNumber * secondNumber;
+        } else if (sign.equals("/")) {
+            result = (int)(firstNumber / secondNumber);
+        }
+
+        if (result < 1) {
+            System.out.println("Значение римских цифр не может быть меньше 1");
+            System.exit(0);
+        }
+
+        String romanReuslt = arabicToRoman(result);
+
+        return romanReuslt;
+    }
+
+    /**
+     * Convert arabic number to roman numbers
+     * @param number
+     * @return
+     */
+    public static String arabicToRoman(int number) {
+        int[] values = {1000,900,500,400,100,90,50,40,10,9,5,4,1};
+        String[] romanLiterals = {"M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"};
+        StringBuilder roman = new StringBuilder();
+
+        for(int i=0;i<values.length;i++) {
+            while(number >= values[i]) {
+                number -= values[i];
+                roman.append(romanLiterals[i]);
+            }
+        }
+        return roman.toString();
+    }
+
+
+    /**
+     * the result of the expression of the entered Arabic numerals
+     * @param number1
+     * @param number2
+     * @param sign
+     * @return
+     */
+    private static int arabicNumbersCalculate(String number1, String number2, String sign) {
+        int result = 0;
+
+        int firstNumber = Integer.parseInt(number1);
+        int secondNumber = Integer.parseInt(number2);
+
+        if (firstNumber < 1 || secondNumber > 10) {
+            System.out.println("Выход за пределы значений");
+        }
+        String operationSign = sign;
+
+        if (sign.equals("+")) {
+            result = firstNumber + secondNumber;
+        } else if (sign.equals("-")) {
+            result = firstNumber - secondNumber;
+        } else if (sign.equals("*")) {
+            result = firstNumber * secondNumber;
+        } else if (sign.equals("/")) {
+            result = (int)(firstNumber / secondNumber);
+        }
+
+        return result;
+    }
+
+
+    /**
+     * check entered numbers
+     * Arabic or Roman
+     * @param number1
+     * @param number2
+     * @return
+     */
     private static String checkDataType(String number1, String number2) {
         String result = "";
 
@@ -70,6 +208,11 @@ public class Main {
         return result;
     }
 
+    /**
+     * Get arithmetic sign from a string
+     * @param data
+     * @return
+     */
     private static String getSign(String data) {
         String result = "";
 
@@ -86,6 +229,10 @@ public class Main {
         return result;
     }
 
+    /**
+     * checking the input string for validity
+     * @param data
+     */
     private static void dataValidation(String data) {
         String result = "";
 
@@ -137,7 +284,23 @@ public class Main {
                     }
                 }
             }
+
         }
 
+        int counter = 0;
+
+        for (String value : values) {
+            if (inputData.contains(value)) {
+                counter += 1;
+            }
+        }
+
+        if (counter > 1) {
+            try {
+                throw new Exception();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
