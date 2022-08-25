@@ -8,6 +8,9 @@ import java.util.regex.Pattern;
  * Test tasks
  * Simple calculator for kata academy
  * @Author Silichev Andrey
+ * Примкчания
+ * программа позволяет вводить римские цифры, как в нижнем, так и в верхнем регистре
+ * Например I + I или i + i
  */
 public class Main {
     public static void main(String[] args) {
@@ -25,8 +28,6 @@ public class Main {
             }
             calc(data);
         }
-
-
     }
 
     /**
@@ -55,9 +56,12 @@ public class Main {
 
 
         if (numbersTypeResult.equals("arabic")) {
-
-            int operationResult = arabicNumbersCalculate(firstNumber, secondNumber, operationSign);
-            System.out.println(operationResult);
+            try {
+                int operationResult = arabicNumbersCalculate(firstNumber, secondNumber, operationSign);
+                System.out.println(operationResult);
+            } catch (RuntimeException e) {
+                System.out.println("Выход за пределы диапазона значений");
+            }
 
 
         } else if (numbersTypeResult.equals("romanian")) {
@@ -65,7 +69,8 @@ public class Main {
                 String result = romanianNumbersCalculate(firstNumber, secondNumber, operationSign);
                 System.out.println(result);
             } catch (RuntimeException e) {
-                System.out.println("Выход за пределы диапазона значений");
+                System.out.println("Значение римских цифр не может быть меньше 1");
+
             }
         }
     }
@@ -119,8 +124,11 @@ public class Main {
         }
 
         if (result < 1) {
-            System.out.println("Значение римских цифр не может быть меньше 1");
-            System.exit(0);
+            try {
+                throw new Exception();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         String romanReuslt = arabicToRoman(result);
